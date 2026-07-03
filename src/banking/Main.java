@@ -1,4 +1,5 @@
 package banking;
+
 import java.util.Scanner;
 
 public class Main {
@@ -6,9 +7,14 @@ public class Main {
     public static int login(Scanner scanner,BankAccount account){
         boolean isLoggedIn = true;
         while(isLoggedIn){
-            System.out.println("1. Balance\n" +
-                    "2. Log out\n" +
-                    "0. Exit");
+            System.out.println("""
+                    1. Balance
+                    2. Add income
+                    3. Do transfer
+                    4. Close account
+                    5. Log out
+                    0. Exit
+                    """);
 
             int loggedInChoice = scanner.nextInt();
 
@@ -17,6 +23,24 @@ public class Main {
                     System.out.println("Balance: "+account.getBalance());
                     break;
                 case 2:
+                    System.out.println("Enter income:");
+                    int amount = scanner.nextInt();
+                    account.setBalance(amount);
+                    AccountDAO.updateBalance(amount,account.getCardNumber());
+                    break;
+                case 3:
+                    System.out.println("Transfer\n" +
+                            "Enter card number:");
+                    String cardNum = scanner.nextLine();
+//                    account.doTransfer(amount);
+//                    AccountDAO.updateBalance(amount,account.getCardNumber());
+                    break;
+                case 4:
+                    AccountDAO.deleteAccount(account.getCardNumber());
+                    System.out.println("The account has been closed!");
+                    isLoggedIn=false;
+                    break;
+                case 5:
                     System.out.println("Logged out");
                     isLoggedIn=false;
                     break;
@@ -30,7 +54,8 @@ public class Main {
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        BankAccount account = new BankAccount();
+
+        Database.createTable();
 
         while(true){
             System.out.println("1. Create an account\n" +
@@ -45,7 +70,8 @@ public class Main {
                     String cardNumber = CardGenerator.accountNumber();
                     String pin = CardGenerator.pinCodeGenerator();
                     int balance = 0;
-                    account.createAccount(cardNumber,pin,balance);
+                    BankAccount account = new BankAccount(cardNumber,pin,balance);
+                    AccountDAO.insertCard(account);
                     System.out.println("Your card has been created");
                     account.getAccountDetails();
                     break;
@@ -61,13 +87,17 @@ public class Main {
 //                        break;
 //                    }
 
-                    if(account.getCardNumber().equals(accNum) && account.getPinCode().equals(accPin)){
+                    BankAccount loginAccount = AccountDAO.login(accNum,accPin);
+
+                    if(loginAccount!=null){
                             System.out.println("You have successfully logged in!");
-                            int logType = login(scanner,account);
+                            int logType = login(scanner,loginAccount);
                             if(logType==0){
                                 return;
                             }
-                        }
+                        }else{
+                        System.out.println("Wrong card number or PIN!");
+                    }
                     break;
                 case 0:
                     System.out.println("Bye!");
