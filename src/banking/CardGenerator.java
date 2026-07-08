@@ -53,18 +53,26 @@ public class CardGenerator {
 
     }
 
+    public static boolean isCardValid(String cardNumber){
+        int sum = luhnAlgorithmGenerator(cardNumber);
+        if(sum%10==0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+
     public static String accountNumber() {
         String uniqueNum = randomNumberGenerator();
         int lastDigit = luhnAlgorithmGenerator(uniqueNum);
         uniqueNum+=lastDigit;
-//     System.out.println(uniqueNum);
-//        int sum = luhnAlgorithmGenerator(uniqueNum);
-//        if(sum%10==0){
-//            System.out.println("Legit");
-//        }else{
-//            System.out.println("not legit");
-//        }
-        return uniqueNum;
+        boolean isCardValid = isCardValid(uniqueNum);
+        if(isCardValid){
+            return uniqueNum;
+        }else{
+            return accountNumber();
+        }
     }
 }
 

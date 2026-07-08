@@ -13,6 +13,7 @@ A console-based banking application built using **Java**, **JDBC**, and **SQLite
 * Delete an account
 * Persistent data storage using SQLite
 * Secure database access using JDBC Prepared Statements
+* Transfer money between accounts
 
 ## Technologies
 

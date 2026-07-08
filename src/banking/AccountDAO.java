@@ -1,8 +1,5 @@
 package banking;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.PreparedStatement;
+import java.sql.*;
 
 public class AccountDAO{
 
@@ -52,7 +49,7 @@ public class AccountDAO{
         return null;
     }
 
-    public static void updateBalance(int amount,String cardNum){
+    public static void deposit(int amount,String cardNum){
         String sql = """
                 UPDATE card SET balance = balance + ? WHERE number = ? ;
                 """;
@@ -88,5 +85,71 @@ public class AccountDAO{
         }
         
     }
+
+    public static BankAccount accountExists(String cardNum){
+        String sql = """
+                SELECT * FROM card WHERE number = ?;
+                """;
+
+        try( Connection connection = Database.connect();
+             PreparedStatement pstm = connection.prepareStatement(sql)
+        ){
+            pstm.setString(1,cardNum);
+            try(ResultSet rs = pstm.executeQuery()){
+                if(rs.next()){
+                        return new BankAccount(rs.getString("number"),
+                                rs.getString("pin"),
+                                rs.getInt("balance"));
+
+                }
+            }
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static int getBalance(String cardNum){
+        String sql = """
+                SELECT balance FROM card WHERE number = ?;
+                """;
+
+        try( Connection connection = Database.connect();
+             PreparedStatement pstm = connection.prepareStatement(sql)
+        ){
+            pstm.setString(1,cardNum);
+            try(ResultSet rs = pstm.executeQuery()){
+                if(rs.next()){
+                    return rs.getInt("balance");
+                }
+            }
+
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public static void withdraw(int amount, String cardNum){
+        String sql = """
+                UPDATE card SET balance = balance - ? WHERE number = ?;
+                """;
+
+        try( Connection connection = Database.connect();
+             PreparedStatement pstm = connection.prepareStatement(sql)
+        ){
+            pstm.setInt(1,amount);
+            pstm.setString(2,cardNum);
+
+            pstm.executeUpdate();
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
+    }
+
+
 
 }

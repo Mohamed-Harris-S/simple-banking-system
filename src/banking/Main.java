@@ -17,23 +17,52 @@ public class Main {
                     """);
 
             int loggedInChoice = scanner.nextInt();
+            scanner.nextLine();
 
             switch(loggedInChoice){
                 case 1:
-                    System.out.println("Balance: "+account.getBalance());
+                    int balance = AccountDAO.getBalance(account.getCardNumber());
+                    System.out.println("Balance: "+balance);
                     break;
                 case 2:
                     System.out.println("Enter income:");
-                    int amount = scanner.nextInt();
-                    account.setBalance(amount);
-                    AccountDAO.updateBalance(amount,account.getCardNumber());
+                    int income = scanner.nextInt();
+                    account.setBalance(income);
+                    AccountDAO.deposit(income,account.getCardNumber());
+                    System.out.println("Income was added!");
                     break;
                 case 3:
                     System.out.println("Transfer\n" +
                             "Enter card number:");
-                    String cardNum = scanner.nextLine();
-//                    account.doTransfer(amount);
-//                    AccountDAO.updateBalance(amount,account.getCardNumber());
+                    String transferCardNum = scanner.nextLine();
+                    boolean isCardValid = CardGenerator.isCardValid(transferCardNum);
+
+                    if( !isCardValid){
+                        System.out.println("Probably you made a mistake in the card number.");
+                        break;
+                    }
+
+                    BankAccount transferAccount = AccountDAO.accountExists(transferCardNum);
+
+                    if(transferAccount==null){
+                        System.out.println("Such a card does not exist.");
+                    }else if(transferAccount.getCardNumber().equals(account.getCardNumber())){
+                        System.out.println("You can't transfer money to the same account!");
+                    }
+                    else{
+                        System.out.println("Enter how much money you want to transfer:");
+                        int amount = scanner.nextInt();
+                        int transferBalance = AccountDAO.getBalance(account.getCardNumber());
+
+                        if(transferBalance>amount){
+                            AccountDAO.withdraw(amount,account.getCardNumber());
+                            AccountDAO.deposit(amount,transferCardNum);
+                            System.out.println("Success!");
+                        }else{
+                            System.out.println("Not enough money!");
+                        }
+                    }
+
                     break;
                 case 4:
                     AccountDAO.deleteAccount(account.getCardNumber());
